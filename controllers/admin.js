@@ -14,14 +14,17 @@ exports.postAddProduct = (req, res, next)=>{
     const price = req.body.price;
     const description = req.body.description;
 
-    Product.create({
+    req.user
+    // user.createProduct method provided by sequelize automatically adds the userId of the user in db
+    .createProduct({
         title: title,
         price: price,
         imageUrl: imageUrl,
         description: description
     })
     .then(result => {
-    console.log(result);
+    // console.log(result);
+    console.log('Created product')
     res.redirect('/admin/products')
     })
     .catch(err => {
@@ -37,8 +40,11 @@ exports.getEditProducts = (req, res, next)=>{
     }
     const prodId = req.params.productId;
 
-    Product.findByPk(prodId)
-    .then(product=>{
+    req.user
+    .getProducts({where : {id : prodId}})
+    // Product.findByPk(prodId)
+    .then(products=>{
+        const product = products[0];
         if(!product) return res.redirect('/');
         res.render('admin/edit-product', 
         {pageTitle: 'Edit Product', 
@@ -76,7 +82,8 @@ exports.postEditProduct = (req, res, next)=>{
 };
 
 exports.getProducts = (req, res, next)=>{
-    Product.findAll()
+    req.user
+    .getProducts()
     .then((products)=>
         {   
             res.render('admin/products', 
