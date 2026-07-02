@@ -4,6 +4,7 @@ const path = require('path');
 
 const errorController = require('./controllers/error');
 const mongoConnect = require('./util/database').mongoConnect;
+const User = require('./models/user');
 
 const app = express();
 
@@ -17,15 +18,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use((req, res, next) => {
-    // User.findByPk(1)
-    //     .then(user => {
-    //         req.user = user; // storing sequlize object user from the database in the req
-    //         // so when we call req.user later we can also excute the sequelize functions
-
-    //         next();
-    //     })
-    //     .catch(err => console.log(err));
-    next();
+    User.findById('6a4648405dea11660329bd17')
+        .then(user => {
+            req.user = new User(user.name, user.email, user.cart, user._id);
+            next();
+        })
+        .catch(err => console.log(err));
 });
 
 app.use('/admin', adminRoutes);

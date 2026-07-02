@@ -1,12 +1,14 @@
 const mongodb = require('mongodb');
 const MongoClient = mongodb.MongoClient;
 
+const keys = require('../keys');
+
 // _ signifies that this variable will only be used internally in this file
 
 let _db;
 
 const mongoConnect = (callback) =>{
-    MongoClient.connect('mongodb+srv://aryathakur_db_user:Al97bfp2VeXXwtfx@cluster0.tvddmzo.mongodb.net/?appName=Cluster0')
+    MongoClient.connect(keys.MONGO_URI)
     .then(client => {
         console.log('Connected!');
         _db = client.db();
