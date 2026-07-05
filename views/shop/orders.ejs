@@ -12,10 +12,10 @@
                         <li>
                             <h1># <%= order._id %> </h1>
                             <ul> 
-                                <% order.items.forEach(product => { %>
+                                <% order.products.forEach(p => { %>
                                      <%# this is comment, product will have orderItem key because of eager loading %>
 
-                                    <li><%= product.title %> (<%= product.quantity %>)</li>
+                                    <li><%= p.product.title %> (<%= p.quantity %>)</li>
                                     
                                 <% }); %>
                             </ul>

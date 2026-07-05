@@ -14,9 +14,17 @@ exports.postAddProduct = (req, res, next)=>{
     const price = req.body.price;
     const description = req.body.description;
 
-    const product = new Product(title, price, description, imageUrl, null, req.user._id);
+    const product = new Product({
+        title: title,
+        price: price,
+        description: description,
+        imageUrl: imageUrl,
+        // mongoose will automatically store the if we write just this
+        userId: req.user
+    });
 
     product.save()
+    //technincally this mongoose save method doesnt give us a promise but we can still use then and catch on it
     .then(result => {
         // console.log(result);
         console.log('Created product')
@@ -26,7 +34,7 @@ exports.postAddProduct = (req, res, next)=>{
     console.log(err);
     });
     
-}
+};
 
 exports.getEditProducts = (req, res, next)=>{
     const editMode = req.query.edit;
@@ -36,7 +44,6 @@ exports.getEditProducts = (req, res, next)=>{
     const prodId = req.params.productId;
 
     Product.findById(prodId)
-    // Product.findByPk(prodId)
     .then(product=>{
         if(!product) return res.redirect('/');
         res.render('admin/edit-product', 
@@ -57,9 +64,16 @@ exports.postEditProduct = (req, res, next)=>{
     const updatedImageUrl = req.body.imageUrl;
     const updatedDesc = req.body.description;
 
-    const product = new Product(updatedTitle, updatedPrice, updatedDesc, updatedImageUrl, prodId);
     
-    product.save()
+    Product.findById(prodId).then(product => {
+        //product is a mongoose object, so we can use mongoose methods on it
+        product.title = updatedTitle;
+        product.price = updatedPrice;
+        product.imageUrl = updatedImageUrl;
+        product.description = updatedDesc;
+
+        return product.save()
+    })
     .then(result=>{
         console.log("Updated Product");
         res.redirect('/admin/products');
@@ -68,9 +82,12 @@ exports.postEditProduct = (req, res, next)=>{
 };
 
 exports.getProducts = (req, res, next)=>{
-    Product.fetchAll()
+    Product.find()
+    // .select('title price -_id')
+    // .populate('userId', 'name')
     .then((products)=>
         {   
+            console.log(products);
             res.render('admin/products', 
             {prods:products, 
             pageTitle:'adminProducts',
@@ -84,7 +101,7 @@ exports.getProducts = (req, res, next)=>{
 exports.postDeleteProduct = (req, res, next)=>{
     const prodId = req.body.productId;
 
-    Product.deleteById(prodId)
+    Product.findByIdAndDelete(prodId)
     .then(() =>{
         console.log("DESTROYED PRODUCT");
         res.redirect('/admin/products');
