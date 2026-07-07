@@ -5,6 +5,7 @@ exports.getAddProducts = (req, res, next)=>{
         {pageTitle: 'Add Product', 
         path: '/admin/add-product', 
         editing: false,
+        isAuthenticated: req.session.isLoggedIn
     });
 }
 
@@ -20,7 +21,7 @@ exports.postAddProduct = (req, res, next)=>{
         description: description,
         imageUrl: imageUrl,
         // mongoose will automatically store the if we write just this
-        userId: req.user
+        userId: req.session.user
     });
 
     product.save()
@@ -50,7 +51,8 @@ exports.getEditProducts = (req, res, next)=>{
         {pageTitle: 'Edit Product', 
         path: '/admin/edit-product', 
         editing: editMode,
-        product: product
+        product: product, 
+        isAuthenticated: req.session.isLoggedIn
         });
     })
     .catch(err => console.log(err));
@@ -92,6 +94,7 @@ exports.getProducts = (req, res, next)=>{
             {prods:products, 
             pageTitle:'adminProducts',
             path:'/admin/products', 
+            isAuthenticated: req.session.isLoggedIn
             }); 
         })
     .catch(err => console.log(err));
