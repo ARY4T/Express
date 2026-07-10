@@ -67,22 +67,25 @@ exports.postEditProduct = (req, res, next)=>{
     
     Product.findById(prodId).then(product => {
         //product is a mongoose object, so we can use mongoose methods on it
+        if(product.userId.toString() !== req.user._id.toString()){
+            return res.rediret('/');
+        }
         product.title = updatedTitle;
         product.price = updatedPrice;
         product.imageUrl = updatedImageUrl;
         product.description = updatedDesc;
 
-        return product.save()
-    })
-    .then(result=>{
+        return product.save().then(result=>{
         console.log("Updated Product");
         res.redirect('/admin/products');
     })
+    })
+    
     .catch(err => console.log(err));
 };
 
 exports.getProducts = (req, res, next)=>{
-    Product.find()
+    Product.find({userId: req.user._id})
     // .select('title price -_id')
     // .populate('userId', 'name')
     .then((products)=>
@@ -101,7 +104,7 @@ exports.getProducts = (req, res, next)=>{
 exports.postDeleteProduct = (req, res, next)=>{
     const prodId = req.body.productId;
 
-    Product.findByIdAndDelete(prodId)
+    Product.deleteOne({_id: prodId, userId: req.user._id})
     .then(() =>{
         console.log("DESTROYED PRODUCT");
         res.redirect('/admin/products');
