@@ -124,3 +124,5 @@ dist
 
 # Ignore sensitive keys
 keys.js
+
+slides.pdf
