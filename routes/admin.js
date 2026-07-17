@@ -23,11 +23,6 @@ router.post('/add-product',
             .withMessage('Title must be at least 3 characters long.')
             .trim(),
 
-        body('imageUrl')
-            .trim()
-            .isLength({min : 3})
-            .withMessage('Please enter a valid image URL.'),
-
         body('price')
             .isFloat()
             .withMessage('Please enter a valid price.'),
@@ -48,8 +43,6 @@ router.post('/edit-product',
             .isString()
             .isLength({min : 3})
             .trim(),
-
-        body('imageUrl').isURL(),
 
         body('price').isFloat(),
 
