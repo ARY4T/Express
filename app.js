@@ -35,8 +35,9 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const { doubleCsrfProtection, generateToken } = doubleCsrf({
+const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
     getSecret: () => process.env.CSRF_SECRET,
+    getSessionIdentifier: (req) => req.session.id,
     cookieName: '__csrf',
     cookieOptions: {
         httpOnly: true,
@@ -45,7 +46,7 @@ const { doubleCsrfProtection, generateToken } = doubleCsrf({
         path: '/'
     },
     size: 64,
-    getTokenFromRequest: (req) => {
+    getCsrfTokenFromRequest: (req) => {
         // Check body field first (form submissions), then header (fetch/AJAX)
         return req.body._csrf || req.headers['x-csrf-token'];
     }
@@ -90,7 +91,7 @@ app.use(flash());
 //res.locals is provided by express js
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.session.isLoggedIn;
-    res.locals.csrfToken = generateToken(req, res);
+    res.locals.csrfToken = generateCsrfToken(req, res);
     next();
 })
 
@@ -121,7 +122,7 @@ app.get('/500', errorController.get500);
 app.use(errorController.get404);
 
 app.use((error, req, res, next) => {
-    // res.redirect('/500');
+    console.error('SERVER ERROR:', error);
     res.status(500).render('500',
         {
             pageTitle: "Error!",
@@ -129,7 +130,6 @@ app.use((error, req, res, next) => {
             isAuthenticated: req.session?.isLoggedIn
         }
     );
-
 });
 
 mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.tvddmzo.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}?appName=Cluster0`)
