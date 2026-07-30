@@ -71,7 +71,19 @@ const authRoutes = require('./routes/auth');
 
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'});
 
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "js.stripe.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
+            fontSrc: ["'self'", "fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "res.cloudinary.com"],
+            connectSrc: ["'self'", "api.stripe.com"],
+            frameSrc: ["'self'", "js.stripe.com"]
+        }
+    }
+}));
 app.use(compression());
 app.use(morgan('combined', {stream: accessLogStream}));
 
