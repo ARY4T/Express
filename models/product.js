@@ -19,6 +19,10 @@ const productSchema = new Schema({
         type: String,
         required: true
     },
+    imagePublicId: {
+        type: String,
+        required: true
+    },
     userId: {
         type: Schema.Types.ObjectId,
         // name of the model to which it is related

@@ -1,9 +1,7 @@
-const fs = require('fs');
+const {v2: cloudinary} = require('cloudinary');
 
-const deleteFile = (filePath) => {
-    fs.unlink(filePath, (err)=>{
-        if(err) throw(err);
-    })
+const deleteFile = async (imagePublicID) => {
+    await cloudinary.uploader.destroy(imagePublicID);
 }
 
 exports.deleteFile = deleteFile;

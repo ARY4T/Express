@@ -9,7 +9,7 @@ const deleteProduct = (btn) => {
     fetch('/admin/product/'+prodId, {
         method: 'DELETE',
         headers: {
-            'csrf-token': csrf
+        'x-csrf-token': csrf
         }
     })
     .then(result => {

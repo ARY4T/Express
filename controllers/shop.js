@@ -6,9 +6,7 @@ const PDFDocument = require('pdfkit');
 const Product = require('../models/product');
 const Orders = require('../models/orders');
 
-const keys = require('../keys');
-const product = require('../models/product');
-const stripe = require('stripe')(keys.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 const ITEMS_PER_PAGE = 2;
 
@@ -150,13 +148,7 @@ exports.getCheckout = (req, res, next)=>{
             });
         })
         .then(session => {
-            res.render('shop/checkout', {
-                path: '/checkout',
-                pageTitle: 'Your Checkout',
-                products: products,
-                totalSum: total,
-                sessionId: session.id
-            });
+            res.redirect(303, session.url);
         })
         .catch(err => {
             const error = new Error(err);

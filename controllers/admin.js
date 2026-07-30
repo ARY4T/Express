@@ -63,7 +63,8 @@ exports.postAddProduct = (req, res, next)=>{
         price: price,
         description: description,
         imageUrl: imageUrl,
-        userId: req.user
+        userId: req.user,
+        imagePublicId: image.filename
     });
 
     product.save()
@@ -145,8 +146,9 @@ exports.postEditProduct = (req, res, next)=>{
         product.title = updatedTitle;
         product.price = updatedPrice;
         if(image){
-            fileHelper.deleteFile(product.imageUrl);
+            fileHelper.deleteFile(product.imagePublicId);
             product.imageUrl = image.path;
+            product.imagePublicId = image.filename;
         }
         product.description = updatedDesc;
 
@@ -191,7 +193,7 @@ exports.deleteProduct = (req, res, next)=>{
         if(!product){
             return next(new Error('Product not found!'));
         }
-        fileHelper.deleteFile(product.imageUrl);
+        fileHelper.deleteFile(product.imagePublicId);
         return Product.deleteOne({_id: prodId, userId: req.user._id});
     })
     .then(() =>{

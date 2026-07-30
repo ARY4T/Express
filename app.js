@@ -1,68 +1,96 @@
+require('dotenv').config();
+
 const express = require('express');
+
+const fs = require('fs');
 
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDbStore = require('connect-mongodb-session')(session);
-const csrf = require('csurf');
+const cookieParser = require('cookie-parser');
+const { doubleCsrf } = require('csrf-csrf');
 const flash = require('connect-flash');
 const multer = require('multer');
+const helmet = require('helmet');
+const compression = require('compression');
+const morgan = require('morgan');
+const {v2:cloudinary} = require('cloudinary');
+const {CloudinaryStorage} = require('multer-storage-cloudinary')
 
 const path = require('path');
-const key = require('./keys');
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
 
 const app = express();
 const store = new MongoDbStore({
-    uri: key.MONGO_URI,
+    uri: `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.tvddmzo.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}?appName=Cluster0`,
     collection: 'sessions'
 });
 
-const csrfProtection = csrf();
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const { doubleCsrfProtection, generateToken } = doubleCsrf({
+    getSecret: () => process.env.CSRF_SECRET,
+    cookieName: '__csrf',
+    cookieOptions: {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/'
+    },
+    size: 64,
+    getTokenFromRequest: (req) => {
+        // Check body field first (form submissions), then header (fetch/AJAX)
+        return req.body._csrf || req.headers['x-csrf-token'];
+    }
+});
+
+
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
-const fileStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'images');
-    },
-    filename: (req, file, cb) => {
-        cb(null, new Date().toISOString() + '-' + file.originalname);
+const fileStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'ecommerce',
+        allowed_formats: ['jpg', 'jpeg', 'png']
     }
 });
-
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
-        cb(null, true);
-    }
-    else {
-        cb(null, false);
-    }
-}
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'});
+
+app.use(helmet());
+app.use(compression());
+app.use(morgan('combined', {stream: accessLogStream}));
+
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single('image'));
+app.use(multer({ storage: fileStorage}).single('image'));
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/images', express.static(path.join(__dirname, 'images')));
 
-app.use(session({ secret: 'my secret', resave: false, saveUninitialized: false, store: store }));
+app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false, store: store }));
 
-app.use(csrfProtection);
+// cookie-parser must come BEFORE csrf-csrf middleware
+app.use(cookieParser());
+app.use(doubleCsrfProtection);
 app.use(flash());
 
 
 //res.locals is provided by express js
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.session.isLoggedIn;
-    res.locals.csrfToken = req.csrfToken();
+    res.locals.csrfToken = generateToken(req, res);
     next();
 })
 
@@ -104,9 +132,9 @@ app.use((error, req, res, next) => {
 
 });
 
-mongoose.connect(key.MONGO_URI)
+mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.tvddmzo.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}?appName=Cluster0`)
     .then((result) => {
-        app.listen(3000);
+        app.listen(process.env.PORT || 3000);
     })
     .catch(err => {
         console.log(err);
