@@ -1,9 +1,9 @@
 {
-  "name": "express",
+  "name": "ecommerce-store",
   "version": "1.0.0",
-  "description": "",
+  "description": "Full-stack e-commerce platform with Stripe payments and MongoDB",
   "license": "ISC",
-  "author": "",
+  "author": "Arya Thakur",
   "type": "commonjs",
   "main": "app.js",
   "engines": {
@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "body-parser": "^2.2.2",
     "cloudinary": "^1.41.3",
     "compression": "^1.8.1",
     "connect-flash": "^0.1.1",
@@ -26,7 +25,6 @@
     "dotenv": "^17.4.2",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
-    "express-handlebars": "3.0",
     "express-session": "^1.19.0",
     "express-validator": "^7.3.2",
     "helmet": "^8.3.0",
@@ -35,12 +33,9 @@
     "morgan": "^1.11.0",
     "multer": "^2.2.0",
     "multer-storage-cloudinary": "^4.0.0",
-    "mysql2": "^3.20.0",
     "nodemailer": "^9.0.3",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "pdfkit": "^0.19.1",
-    "pug": "^3.0.3",
-    "sequelize": "^6.37.8",
     "stripe": "^22.3.2"
   },
   "devDependencies": {

@@ -1,6 +1,10 @@
-server.cert
-server.key
-access.log
-slides.pdf
 node_modules
 .env
+.DS_Store
+access.log
+*.log
+data/invoices/
+.vscode/
+server.cert
+server.key
+slides.pdf

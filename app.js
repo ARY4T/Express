@@ -4,7 +4,6 @@ const express = require('express');
 
 const fs = require('fs');
 
-const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDbStore = require('connect-mongodb-session')(session);
@@ -90,7 +89,7 @@ app.use(helmet({
 app.use(compression());
 app.use(morgan('combined', {stream: accessLogStream}));
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false }));
 app.use(multer({ storage: fileStorage}).single('image'));
 
 app.use(express.static(path.join(__dirname, 'public')));

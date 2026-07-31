@@ -1,4 +1,3 @@
-const product = require('../models/product');
 const Product = require('../models/product');
 const fileHelper = require('../util/file');
 
