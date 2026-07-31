@@ -143,7 +143,7 @@ exports.getCheckout = (req, res, next)=>{
                         quantity: p.quantity
                     };
                 }),
-                success_url: req.protocol + '://' + req.get('host') + '/checkout/success',
+                success_url: req.protocol + '://' + req.get('host') + '/checkout/success?session_id={CHECKOUT_SESSION_ID}',
                 cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel'
             });
         })
@@ -191,10 +191,21 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.getCheckoutSuccess = (req, res, next) => {
+    const sessionId = req.query.session_id;
 
-    req.user
-        .populate('cart.items.productId')
+    if (!sessionId) {
+        return res.redirect('/checkout');
+    }
+
+    stripe.checkout.sessions.retrieve(sessionId)
+        .then(session => {
+            if (session.payment_status !== 'paid') {
+                return res.redirect('/checkout/cancel');
+            }
+            return req.user.populate('cart.items.productId');
+        })
         .then(user => {
+            if (!user) return; // redirected above
             const products = user.cart.items.map(i => {
                 return { quantity: i.quantity, product: { ...i.productId._doc } }
             });
@@ -205,13 +216,12 @@ exports.getCheckoutSuccess = (req, res, next) => {
                     userId: req.user,
                 },
                 products: products
-
             });
             return order.save();
         })
-        .then((result) => {
+        .then(result => {
+            if (!result) return; // redirected above
             return req.user.clearCart();
-
         })
         .then(() => {
             res.redirect('/orders');

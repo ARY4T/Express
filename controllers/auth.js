@@ -214,7 +214,7 @@ exports.postReset = (req, res, next) => {
                     subject: 'Password Reset!',
                     html: `
                     <p>You requested a password reset</p>
-                    <p>Click this <a href="http://localhost:3000/reset/${token}">link</a> to set a new password.</p>
+                    <p>Click this <a href="${req.protocol}://${req.get('host')}/reset/${token}">link</a> to set a new password.</p>
                     `
                 })
         })  
@@ -231,6 +231,11 @@ exports.getNewPassword = (req, res, next) => {
     const token = req.params.token;
     User.findOne({resetToken: token, resetTokenExpiration: {$gt: Date.now()}})
     .then(user => {
+        if (!user) {
+            req.flash('error', 'Token is invalid or has expired.');
+            return res.redirect('/reset');
+        }
+
         let message = req.flash('error');
         if(message.length > 0){
             message = message[0];

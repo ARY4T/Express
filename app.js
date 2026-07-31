@@ -24,8 +24,11 @@ const errorController = require('./controllers/error');
 const User = require('./models/user');
 
 const app = express();
+
+const MONGO_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.tvddmzo.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}?appName=Cluster0`;
+
 const store = new MongoDbStore({
-    uri: `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.tvddmzo.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}?appName=Cluster0`,
+    uri: MONGO_URI,
     collection: 'sessions'
 });
 
@@ -144,7 +147,7 @@ app.use((error, req, res, next) => {
     );
 });
 
-mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.tvddmzo.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}?appName=Cluster0`)
+mongoose.connect(MONGO_URI)
     .then((result) => {
         app.listen(process.env.PORT || 3000);
     })
