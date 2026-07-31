@@ -104,7 +104,7 @@ exports.getCheckout = (req, res, next)=>{
                 line_items: products.map(p => {
                     return {
                         price_data: {
-                            currency: 'usd',
+                            currency: 'inr',
                             unit_amount: Math.round(p.productId.price * 100),
                             product_data: {
                                 name: p.productId.title,
@@ -256,10 +256,10 @@ exports.getInvoice = (req, res, next) => {
         let totalPrice = 0;
         order.products.forEach(prod => {
             totalPrice += prod.quantity*prod.product.price;
-            pdfDoc.fontSize(14).text(prod.product.title + ' - ' + prod.quantity + ' x ' + '$' + prod.product.price);
+            pdfDoc.fontSize(14).text(prod.product.title + ' - ' + prod.quantity + ' x ' + '₹' + prod.product.price);
         });
         pdfDoc.text('----');
-        pdfDoc.text('Total Price: $' + totalPrice);
+        pdfDoc.text('Total Price: ₹' + totalPrice);
         
         pdfDoc.end();
     }).catch(err => {
